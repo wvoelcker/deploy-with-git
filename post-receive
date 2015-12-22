@@ -1,0 +1,26 @@
+#!/bin/sh
+
+#
+# To deploy using git, create a bare repository on your destination server
+# containing this post-receive hook.
+#
+# If you set this bare repository up as a 'remote' on your dev server you
+# can then push to it using 'git push'.
+#
+# The 'token replacements' at the end are separate - they will replace the
+# string '@@deploytime@@' with the current unix timestamp wherever it appears,
+# within mustache, PHP, CSS, and JS files.
+#
+
+# Project root is two directories above this script; extract the path to a variable
+PROJROOT=$( cd $(dirname $0); cd ../..; pwd -P )
+
+# Extract latest version from git
+GIT_WORK_TREE=$PROJROOT git checkout -f
+
+# Replace tokens
+deployTime=$(date +"%s")
+find $PROJROOT/ -name *.mustache | xargs sed -i "s/@@deploytime@@/$deployTime/i"
+find $PROJROOT/ -name *.php | xargs sed -i "s/@@deploytime@@/$deployTime/i"
+find $PROJROOT/ -name *.css | xargs sed -i "s/@@deploytime@@/$deployTime/i"
+find $PROJROOT/ -name *.js | xargs sed -i "s/@@deploytime@@/$deployTime/i"
